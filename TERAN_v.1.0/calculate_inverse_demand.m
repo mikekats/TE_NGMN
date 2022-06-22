@@ -1,0 +1,69 @@
+function inverse_demand = calculate_inverse_demand(alfaG, betaG, gamaG,...
+                                                   G,...
+                                                   end_point,...
+                                                   end_point_long,...
+                                                   range)
+%calculate_inverse_demand Summary of this function goes here
+%   Detailed explanation goes here
+
+%Define and initialize struct (allocate memory) 
+temp_struct = temp_create_struct_investment_cost();
+
+
+[temp_struct.marginal_revenue_resolution,...
+~,...
+temp_struct.quantity_log_resolution,...
+temp_struct.price_log_resolution] = ...
+calcMR(1, end_point, range, ...
+       alfaG, betaG, gamaG,...
+       G);  
+
+                                         
+[temp_struct.marginal_revenue_resolution_long,...
+~,...
+temp_struct.quantity_log_resolution_long,...
+temp_struct.price_log_resolution_long] = ...
+calcMR(1, end_point_long, range, ...
+       alfaG, betaG, gamaG,...
+       G);  
+
+
+                                             
+inverse_demand = temp_struct;
+
+
+    %**************************************************************************
+    % Nested functions
+    %**************************************************************************
+           
+    
+    function temp_struct = temp_create_struct_investment_cost()  
+       
+        temp_struct = struct('quantity_log_resolution',0,....
+                             'price_log_resolution',0,...
+                             'marginal_revenue_resolution',0,...
+                             'quantity_log_resolution_long',0,...
+                             'price_log_resolution_long',0,...
+                             'marginal_revenue_resolution_long',0);
+        
+    end
+
+    function [MR, TR, Q, P] = calcMR(Qinterestmin,Qinterestmax,points,alfa,beta,gama,G)
+    % calculate the marginal revenue
+
+            Qmin_point = log(Qinterestmin);
+            Qmax_point = log(Qinterestmax);
+            Qpoints_point = points;
+            Q_point = linspace(Qmin_point,Qmax_point,Qpoints_point);
+            P_point  = alfa*Q_point+beta*log(G)+gama;
+            TR_point = exp(Q_point).*exp(P_point);
+            MR_point = diff(TR_point)./diff(exp(Q_point));
+
+            MR = [0 MR_point];
+            TR = 12*TR_point;
+            Q = Q_point;
+            P = P_point;
+    end
+
+end
+
